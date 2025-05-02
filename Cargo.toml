@@ -1,0 +1,57 @@
+[package]
+edition = "2024"
+name = "frytg-sensory"
+version = "0.1.0"
+
+# [[bin]]
+# name = "frytg-sensory"
+# path = "./src/bin/main.rs"
+
+[dependencies]
+esp-alloc = "0.7.0"
+esp-backtrace = { version = "0.15.1", features = [
+	"esp32c6",
+	"exception-handler",
+	"panic-handler",
+	"println",
+] }
+esp-hal = { version = "1.0.0-beta.0", features = ["esp32c6", "unstable"] }
+esp-hal-embassy = { version = "0.7.0", features = ["esp32c6"] }
+esp-println = { version = "0.13.1", features = ["esp32c6", "log"] }
+esp-wifi = { version = "0.13.0", features = ["esp32c6", "wifi", "smoltcp"] }
+embassy-executor = { version = "0.7.0", features = ["task-arena-size-20480"] }
+embassy-net = { version = "0.6.0", features = [
+	"tcp",
+	"dhcpv4",
+	"dhcpv4-hostname",
+] }
+embassy-time = "0.4.0"
+embedded-io = { version = "0.6.1", default-features = false }
+embedded-io-async = "0.6.1"
+static_cell = { version = "2.1.0", features = ["nightly"] }
+
+# sensors
+scd4x = "0.4.0"
+
+# leds
+smart-leds = "0.4.0"
+ws2812-spi = { git = "https://github.com/smart-leds-rs/ws2812-spi-rs" }
+
+# serde/ json
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+heapless = "0.8.0"
+
+[profile.dev]
+# Rust debug is too slow.
+# For debug builds always builds with some optimization
+opt-level = 3
+
+[profile.release]
+codegen-units = 1        # LLVM can perform better optimizations using a single thread
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 's'
+overflow-checks = false

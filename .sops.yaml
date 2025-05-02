@@ -1,0 +1,15 @@
+# make sure to run `just rotate-keys` after any changes to this file
+# also make sure to sync this with all other repos
+
+# creation rules are evaluated sequentially, the first match wins
+creation_rules:
+  - age: >-
+      age1zr7vgtl6j3awvdr53qy7czr3dlatsr9ytpwdpz2qzry3xhxpf30svanjpj
+    # this age public key is a backup key for `locally`, saved to 1P
+    # see https://getsops.io/docs/#encrypting-using-age if you want to use this as your own main key
+    pgp: >-
+      BC954B2AAED2E832227C4EB4A2475C9531C8AC40,
+      BC130F8A5A30E0248FCD524E9110A9F349EB8709
+    # these fingerprints of PGP keys belong to the team
+    # they need to be comma-separated (except the last one)
+    # you can get your own fingerprints with `just list-pgp`
