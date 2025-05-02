@@ -56,10 +56,10 @@ impl LedController<'_> {
 
 	pub fn set_color(&mut self, color: &str) {
 		match color {
-			"yellow" => self.set_to_color(RGB8 { r: 250, g: 150, b: 10 }),
-			"red" => self.set_to_color(RGB8 { r: 250, g: 0, b: 0 }),
-			"green" => self.set_to_color(RGB8 { r: 0, g: 110, b: 0 }),
-			"blue" => self.set_to_color(RGB8 { r: 0, g: 0, b: 70 }),
+			"yellow" => self.set_to_color(RGB8 { r: 150, g: 50, b: 5 }),
+			"red" => self.set_to_color(RGB8 { r: 150, g: 0, b: 0 }),
+			"green" => self.set_to_color(RGB8 { r: 0, g: 60, b: 0 }),
+			"blue" => self.set_to_color(RGB8 { r: 0, g: 0, b: 30 }),
 			"off" => self.set_to_color(RGB8 { r: 0, g: 0, b: 0 }),
 			_ => self.set_to_color(RGB8 { r: 0, g: 0, b: 0 }),
 		}

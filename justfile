@@ -21,7 +21,7 @@ list-usb:
 	ls /dev/tty.*
 
 run binary:
-	just decrypt-key sensor-config.sops.json
+	just --yes decrypt-key sensor-config.sops.json
 	just env "cargo run --bin {{binary}} -- --port /dev/tty.usbmodem101"
 
 flash binary:

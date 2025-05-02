@@ -1,6 +1,12 @@
+# docs: https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference
+
 version: 2
+
 updates:
-   - package-ecosystem: "cargo"
-     directory: "/"
-     schedule:
-        interval: "daily"
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: daily
+      time: "07:00"
+    assignees:
+      - frytg
