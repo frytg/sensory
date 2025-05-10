@@ -29,7 +29,7 @@ flash binary:
 	espflash flash --monitor --port /dev/tty.usbmodem101 --chip esp32c6 target/riscv32imac-unknown-none-elf/release/{{binary}}
 
 logs:
-	espflash monitor
+	espflash monitor --port /dev/tty.usbmodem101
 
 format:
 	cargo fmt

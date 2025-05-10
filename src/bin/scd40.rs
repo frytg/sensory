@@ -36,7 +36,7 @@ use serde::Serialize;
 // import local modules
 use frytg_sensory::{
 	led_controller::LedController,
-	sensor_config::{format_mac_address, get_sensor_name},
+	sensor_config::{format_mac_address, get_sensor_config},
 };
 
 #[derive(Serialize)]
@@ -85,9 +85,6 @@ async fn main(spawner: Spawner) -> ! {
 	// Initialize LED controller with 1 LED
 	let mut led_controller = LedController::new(peripherals.GPIO19, peripherals.SPI2, peripherals.GPIO20);
 
-	// set red color during startup
-	led_controller.set_color("yellow");
-
 	// Initialize measurement counter
 	let mut measurement_count = 0;
 
@@ -108,8 +105,18 @@ async fn main(spawner: Spawner) -> ! {
 
 	// Init MAC address before moving device
 	let mac_address = interfaces.sta.mac_address();
-	let sensor_name = get_sensor_name(&mac_address, &mut led_controller);
-	println!("Using sensor name: {}", sensor_name);
+	let sensor_info = get_sensor_config(&mac_address, &mut led_controller);
+	println!("Using sensor name: {}", sensor_info.name);
+
+	// set yellow color during startup if LED is not disabled
+	if !sensor_info.is_led_disabled {
+		led_controller.set_color("yellow");
+	} else {
+		// blink yellow if LED is disabled
+		led_controller.set_color("yellow");
+		led_controller.set_color("green");
+		led_controller.set_color("off");
+	}
 
 	// new timer group
 	let timg1 = TimerGroup::new(peripherals.TIMG1);
@@ -117,7 +124,7 @@ async fn main(spawner: Spawner) -> ! {
 
 	// init dhcp
 	let mut dhcp_config = embassy_net::DhcpConfig::default();
-	let hostname: HString<32> = HString::try_from(sensor_name.as_str()).unwrap();
+	let hostname: HString<32> = HString::try_from(sensor_info.name.as_str()).unwrap();
 	dhcp_config.hostname = Some(hostname);
 	let config = embassy_net::Config::dhcpv4(dhcp_config);
 
@@ -207,7 +214,9 @@ async fn main(spawner: Spawner) -> ! {
 		if measurement_count >= MAX_MEASUREMENTS {
 			println!("Reached {} measurements, rebooting...", MAX_MEASUREMENTS);
 			// Yellow color to indicate reboot
-			led_controller.set_color("yellow");
+			if !sensor_info.is_led_disabled {
+				led_controller.set_color("yellow");
+			}
 			system::software_reset();
 		}
 
@@ -215,24 +224,30 @@ async fn main(spawner: Spawner) -> ! {
 		measurement_count += 1;
 		println!("Measurement count: {}/{}", measurement_count, MAX_MEASUREMENTS);
 
-		// set green during measurement
-		led_controller.set_color("green");
+		// set green during measurement if LED is not disabled
+		if !sensor_info.is_led_disabled {
+			led_controller.set_color("green");
+		}
 
 		// check if data is ready
 		match scd40.data_ready_status() {
 			Ok(ready) => {
 				if !ready {
 					println!("No data ready");
-					led_controller.set_color("yellow");
-					led_controller.set_color("red");
+					if !sensor_info.is_led_disabled {
+						led_controller.set_color("yellow");
+						led_controller.set_color("red");
+					}
 					delay.delay_millis(5000u32);
 					continue;
 				}
 			}
 			Err(e) => {
 				println!("Failed to check data ready status: {:?}", e);
-				led_controller.set_color("red");
-				led_controller.set_color("yellow");
+				if !sensor_info.is_led_disabled {
+					led_controller.set_color("red");
+					led_controller.set_color("yellow");
+				}
 				delay.delay_millis(5000u32);
 				continue;
 			}
@@ -242,7 +257,9 @@ async fn main(spawner: Spawner) -> ! {
 		let measurement = match scd40.measurement() {
 			Ok(measurement) => measurement,
 			Err(err) => {
-				led_controller.set_color("red");
+				if !sensor_info.is_led_disabled {
+					led_controller.set_color("red");
+				}
 				match err {
 					scd4x::Error::Crc => println!("Couldn't read sensor: CRC mismatch"),
 					scd4x::Error::I2c(_) => println!("Couldn't read sensor: i2c mismatch"),
@@ -254,8 +271,10 @@ async fn main(spawner: Spawner) -> ! {
 			}
 		};
 
-		// set blue during data transfer
-		led_controller.set_color("blue");
+		// set blue during data transfer if LED is not disabled
+		if !sensor_info.is_led_disabled {
+			led_controller.set_color("blue");
+		}
 
 		// create socket
 		let mut socket = TcpSocket::new(stack, &mut rx_buffer, &mut tx_buffer);
@@ -273,7 +292,9 @@ async fn main(spawner: Spawner) -> ! {
 		let r = socket.connect(remote_endpoint).await;
 		if let Err(e) = r {
 			println!("Failed to open socket: {:?}", e);
-			led_controller.set_color("red");
+			if !sensor_info.is_led_disabled {
+				led_controller.set_color("red");
+			}
 			delay.delay_millis(1000u32);
 			continue;
 		}
@@ -293,7 +314,7 @@ async fn main(spawner: Spawner) -> ! {
 		println!("json_data: {}", json_data);
 
 		// prepare json data request
-		let full_endpoint = alloc::format!("{}/{}", ENDPOINT, sensor_name);
+		let full_endpoint = alloc::format!("{}/{}", ENDPOINT, sensor_info.name);
 		let http_request = String::from_utf8_lossy(
 			alloc::format!(
 				"POST {} HTTP/1.1\r\n\
@@ -328,8 +349,10 @@ async fn main(spawner: Spawner) -> ! {
 		};
 		println!("{}", core::str::from_utf8(&buf[..n]).unwrap());
 
-		// turn off led
-		led_controller.set_color("off");
+		// turn off led if not disabled
+		if !sensor_info.is_led_disabled {
+			led_controller.set_color("off");
+		}
 		println!("Entering light sleep");
 		println!("");
 

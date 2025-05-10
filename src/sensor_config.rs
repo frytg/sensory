@@ -9,12 +9,19 @@ use crate::led_controller::LedController;
 
 #[derive(Deserialize)]
 pub struct SensorConfig {
-	sensors: BTreeMap<String, String>,
+	pub sensors: BTreeMap<String, SensorInfo>,
 }
 
-const CONFIG_JSON: &str = include_str!("../sensor-config.json");
+#[derive(Deserialize, Clone)]
+pub struct SensorInfo {
+	pub name: String,
+	#[serde(rename = "isLedDisabled")]
+	pub is_led_disabled: bool,
+}
 
-pub fn get_sensor_name(mac_address: &[u8; 6], led_controller: &mut LedController) -> String {
+pub const CONFIG_JSON: &str = include_str!("../sensor-config.json");
+
+pub fn get_sensor_config(mac_address: &[u8; 6], led_controller: &mut LedController) -> SensorInfo {
 	// Format MAC address as string
 	let mac_str = format_mac_address(mac_address);
 	println!("Looking up name for MAC: {}", mac_str);
@@ -22,9 +29,15 @@ pub fn get_sensor_name(mac_address: &[u8; 6], led_controller: &mut LedController
 	// Parse JSON config
 	match from_str::<SensorConfig>(CONFIG_JSON) {
 		Ok(config) => {
-			// Look up sensor name by MAC address
+			// Look up sensor info by MAC address
 			match config.sensors.get(&mac_str) {
-				Some(name) => name.clone(),
+				Some(info) => {
+					// If LED is disabled, turn it off
+					if info.is_led_disabled {
+						led_controller.set_color("off");
+					}
+					info.clone()
+				}
 				None => {
 					println!("ERROR: Unknown device MAC address: {}", mac_str);
 					led_controller.set_color("red");
