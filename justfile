@@ -40,6 +40,9 @@ info:
 targets:
 	rustc --print target-list
 
+update:
+	cargo update
+
 
 ## ---------------------------------
 ## ENCRYPTION shortcuts

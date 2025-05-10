@@ -20,7 +20,7 @@ esp-hal-embassy = { version = "0.7.0", features = ["esp32c6"] }
 esp-println = { version = "0.13.1", features = ["esp32c6", "log"] }
 esp-wifi = { version = "0.13.0", features = ["esp32c6", "wifi", "smoltcp"] }
 embassy-executor = { version = "0.7.0", features = ["task-arena-size-20480"] }
-embassy-net = { version = "0.6.0", features = [
+embassy-net = { version = "0.7.0", features = [
 	"tcp",
 	"dhcpv4",
 	"dhcpv4-hostname",
