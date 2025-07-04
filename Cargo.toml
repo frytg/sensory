@@ -8,7 +8,7 @@ version = "0.1.0"
 # path = "./src/bin/main.rs"
 
 [dependencies]
-esp-alloc = "0.7.0"
+esp-alloc = "0.8.0"
 esp-backtrace = { version = "0.15.1", features = [
 	"esp32c6",
 	"exception-handler",
