@@ -1004,9 +1004,9 @@ checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 
 [[package]]
 name = "scd4x"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "550fedc97e7880654aa7dc840f5eb3b2201a01aae566c4584a3601bb0086cd4c"
+checksum = "455974f1daa137284e9e282362d1074f004028a77ee84c6bb1508c9e89646153"
 dependencies = [
  "embedded-hal 1.0.0",
  "log",
