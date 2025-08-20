@@ -15,7 +15,7 @@ esp-backtrace = { version = "0.15.1", features = [
 	"panic-handler",
 	"println",
 ] }
-esp-hal = { version = "1.0.0-beta.0", features = ["esp32c6", "unstable"] }
+esp-hal = { version = "1.0.0-rc.0", features = ["esp32c6", "unstable"] }
 esp-hal-embassy = { version = "0.7.0", features = ["esp32c6"] }
 esp-println = { version = "0.13.1", features = ["esp32c6", "log"] }
 esp-wifi = { version = "0.13.0", features = ["esp32c6", "wifi", "smoltcp"] }
