@@ -37,7 +37,7 @@ embedded-io-async = "0.6.1"
 static_cell = { version = "2.1.1" }
 
 # sensors
-scd4x = "0.4.0"
+scd4x = "0.4.1"
 
 # leds
 smart-leds = "0.4.0"
