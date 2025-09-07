@@ -51,6 +51,7 @@ update:
 [group('ENCRYPTION')]
 update-keys:
 	just _update-key .env.sops.yaml
+	just _update-key sensor-config.sops.json
 
 _update-key file:
 	sops updatekeys {{file}}
@@ -59,6 +60,7 @@ _update-key file:
 [group('ENCRYPTION')]
 rotate-keys:
 	just _rotate-key .env.sops.yaml
+	just _rotate-key sensor-config.sops.json
 
 _rotate-key file:
 	sops rotate --in-place {{file}}
@@ -84,3 +86,4 @@ decrypt-key file:
 [confirm('This will overwrite all previously decrypted files, are you sure? (type `yes` to continue)')]
 decrypt:
 	just decrypt-key .env.sops.yaml
+	just decrypt-key sensor-config.sops.json

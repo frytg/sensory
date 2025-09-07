@@ -17,6 +17,8 @@ pub struct SensorInfo {
 	pub name: String,
 	#[serde(rename = "isLedDisabled")]
 	pub is_led_disabled: bool,
+	#[serde(rename = "intervalInSeconds")]
+	pub interval_in_seconds: u64,
 }
 
 pub const CONFIG_JSON: &str = include_str!("../sensor-config.json");

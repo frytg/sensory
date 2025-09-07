@@ -55,7 +55,6 @@ const PASSWORD: &str = env!("WIFI_PASSWORD");
 const SERVER_IP: &str = env!("SERVER_IP");
 const SERVER_PORT: &str = env!("SERVER_PORT");
 const ENDPOINT: &str = "/sensor/intake";
-const LIGHT_SLEEP_DURATION_MS: u64 = 20_000; // seconds in microseconds
 const MAX_MEASUREMENTS: u32 = 1000;
 
 fn parse_ip(ip: &str) -> [u8; 4] {
@@ -99,7 +98,7 @@ async fn main(spawner: Spawner) -> ! {
 	// Initialize WiFi
 	let esp_wifi_ctrl = &*mk_static!(
 		EspWifiController<'static>,
-		init(timg0.timer0, rng.clone(), peripherals.RADIO_CLK).unwrap()
+		init(timg0.timer0, rng.clone()).unwrap()
 	);
 	let (controller, interfaces) = esp_wifi::wifi::new(&esp_wifi_ctrl, peripherals.WIFI).unwrap();
 
@@ -124,7 +123,7 @@ async fn main(spawner: Spawner) -> ! {
 
 	// init dhcp
 	let mut dhcp_config = embassy_net::DhcpConfig::default();
-	let hostname: HString<32> = HString::try_from(sensor_info.name.as_str()).unwrap();
+	let hostname: HString<32> = HString::<32>::try_from(sensor_info.name.as_str()).unwrap();
 	dhcp_config.hostname = Some(hostname);
 	let config = embassy_net::Config::dhcpv4(dhcp_config);
 
@@ -357,7 +356,7 @@ async fn main(spawner: Spawner) -> ! {
 		println!("");
 
 		// sleep
-		delay.delay_millis(LIGHT_SLEEP_DURATION_MS as u32);
+		delay.delay_millis((sensor_info.interval_in_seconds * 1000) as u32);
 	}
 }
 

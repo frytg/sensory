@@ -1,8 +1,8 @@
 use esp_hal::{
 	Blocking,
 	delay::Delay,
-	gpio::{GpioPin, Level, Output, OutputConfig},
-	peripherals::SPI2,
+	gpio::{Level, Output, OutputConfig},
+	peripherals::{GPIO19, GPIO20, SPI2},
 	spi::{
 		Mode,
 		master::{Config, Spi},
@@ -18,8 +18,8 @@ pub struct LedController<'a> {
 	data: [RGB8; 1],
 }
 
-impl LedController<'_> {
-	pub fn new(power_pin: GpioPin<19>, spi: SPI2, mosi: GpioPin<20>) -> Self {
+impl<'a> LedController<'a> {
+	pub fn new(power_pin: GPIO19, spi: SPI2<'a>, mosi: GPIO20<'a>) -> LedController<'a> {
 		println!("Initializing LED controller");
 
 		// Set GPIO19 to high power
