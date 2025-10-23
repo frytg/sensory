@@ -42,7 +42,7 @@ targets:
 
 update:
 	cargo update
-
+	cargo install espflash --locked
 
 ## ---------------------------------
 ## ENCRYPTION shortcuts
