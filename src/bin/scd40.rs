@@ -6,6 +6,8 @@
 
 extern crate alloc;
 
+esp_bootloader_esp_idf::esp_app_desc!();
+
 use alloc::string::String;
 use core::net::Ipv4Addr;
 use heapless::String as HString;
@@ -211,18 +213,6 @@ async fn main(spawner: Spawner) -> ! {
 
 	// BEGIN MEASUREMENT LOOP
 	loop {
-		// Check if we've reached 100 measurements, if so reboot
-		if measurement_count >= MAX_MEASUREMENTS {
-			println!("Reached {} measurements, rebooting...", MAX_MEASUREMENTS);
-			// Yellow color to indicate reboot
-			if !sensor_info.is_led_disabled {
-				led_controller.set_color("yellow");
-			}
-			system::software_reset();
-		}
-
-		// Increment measurement counter
-		measurement_count += 1;
 		println!("Measurement count: {}/{}", measurement_count, MAX_MEASUREMENTS);
 
 		// set green during measurement if LED is not disabled
@@ -354,13 +344,38 @@ async fn main(spawner: Spawner) -> ! {
 		if !sensor_info.is_led_disabled {
 			led_controller.set_color("off");
 		}
-		println!("Entering light sleep");
-		println!("");
 
-		// sleep
-		let wake_source = rtc_cntl::sleep::TimerWakeupSource::new(Duration::from_secs(sensor_info.interval_in_seconds).into());
+		// Check if we've reached the configured restart counter, if so reboot
+		if measurement_count >= MAX_MEASUREMENTS {
+			println!("Reached max measurements ({}), rebooting...", MAX_MEASUREMENTS);
+			// Yellow color to indicate reboot
+			if !sensor_info.is_led_disabled {
+				led_controller.set_color("yellow");
+			}
+
+			// reboot now
+			system::software_reset();
+		}
+
+		// Increment measurement counter
+		measurement_count += 1;
+		
+		// when deep sleep is enabled, enter deep sleep after the configured interval
+		if sensor_info.sleep_mode == "deep" {
+			if measurement_count >= sensor_info.interval_for_deep_sleep {
+				let wake_source = rtc_cntl::sleep::TimerWakeupSource::new(Duration::from_secs(sensor_info.deep_sleep_duration_in_seconds).into());
+				println!("Entering deep sleep for {} seconds, after {} measurements", sensor_info.deep_sleep_duration_in_seconds, sensor_info.interval_for_deep_sleep);
+				rtc.sleep_deep(&[&wake_source]);
+			} else {
+				println!("Not entering deep sleep, waiting for {} measurements", sensor_info.interval_for_deep_sleep);
+			}
+		}
+
+		// otherwise, enter light sleep
+		// the possible previous deep sleep will reset the device
+		let wake_source = rtc_cntl::sleep::TimerWakeupSource::new(Duration::from_secs(sensor_info.light_sleep_duration_in_seconds).into());
+		println!("Entering light sleep for {} seconds", sensor_info.light_sleep_duration_in_seconds);
 		rtc.sleep_light(&[&wake_source]);
-		//delay.delay_millis((sensor_info.interval_in_seconds * 1000) as u32);
 	}
 }
 

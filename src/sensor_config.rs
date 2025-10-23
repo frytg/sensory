@@ -17,8 +17,14 @@ pub struct SensorInfo {
 	pub name: String,
 	#[serde(rename = "isLedDisabled")]
 	pub is_led_disabled: bool,
-	#[serde(rename = "intervalInSeconds")]
-	pub interval_in_seconds: u64,
+	#[serde(rename = "lightSleepDurationInSeconds")]
+	pub light_sleep_duration_in_seconds: u64,
+	#[serde(rename = "deepSleepDurationInSeconds")]
+	pub deep_sleep_duration_in_seconds: u64,
+	#[serde(rename = "sleepMode")]
+	pub sleep_mode: String,
+	#[serde(rename = "intervalForDeepSleep")]
+	pub interval_for_deep_sleep: u32,
 }
 
 pub const CONFIG_JSON: &str = include_str!("../sensor-config.json");
