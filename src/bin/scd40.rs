@@ -18,15 +18,11 @@ use embedded_io_async::Write;
 use esp_alloc as _;
 use esp_backtrace as _;
 use esp_hal::{
-	clock::CpuClock,
-	delay::Delay,
-	i2c::master::{Config, I2c},
-	rng::Rng,
-	system,
-	timer::timg::TimerGroup,
+	clock::CpuClock, delay::Delay, i2c::master::{Config, I2c}, rng::Rng, rtc_cntl, system, timer::timg::TimerGroup
 };
 use esp_println::println;
 use esp_wifi::{
+	config::PowerSaveMode,
 	EspWifiController, init,
 	wifi::{ClientConfiguration, Configuration, WifiController, WifiDevice, WifiEvent, WifiState},
 };
@@ -81,6 +77,9 @@ async fn main(spawner: Spawner) -> ! {
 	let config = esp_hal::Config::default().with_cpu_clock(CpuClock::_80MHz);
 	let peripherals = esp_hal::init(config);
 
+	// init RTC
+	let mut rtc = rtc_cntl::Rtc::new(peripherals.LPWR);
+
 	// Initialize LED controller with 1 LED
 	let mut led_controller = LedController::new(peripherals.GPIO19, peripherals.SPI2, peripherals.GPIO20);
 
@@ -100,7 +99,10 @@ async fn main(spawner: Spawner) -> ! {
 		EspWifiController<'static>,
 		init(timg0.timer0, rng.clone()).unwrap()
 	);
-	let (controller, interfaces) = esp_wifi::wifi::new(&esp_wifi_ctrl, peripherals.WIFI).unwrap();
+	let (mut wifi_controller, interfaces) = esp_wifi::wifi::new(&esp_wifi_ctrl, peripherals.WIFI).unwrap();
+
+	// set power saving
+	let _ = wifi_controller.set_power_saving(PowerSaveMode::Maximum);
 
 	// Init MAC address before moving device
 	let mac_address = interfaces.sta.mac_address();
@@ -137,7 +139,7 @@ async fn main(spawner: Spawner) -> ! {
 	);
 
 	// spawn tasks (wifi connection and network task)
-	spawner.spawn(connection(controller)).ok();
+	spawner.spawn(connection(wifi_controller)).ok();
 	spawner.spawn(net_task(runner)).ok();
 
 	// wait until we have a link
@@ -356,37 +358,39 @@ async fn main(spawner: Spawner) -> ! {
 		println!("");
 
 		// sleep
-		delay.delay_millis((sensor_info.interval_in_seconds * 1000) as u32);
+		let wake_source = rtc_cntl::sleep::TimerWakeupSource::new(Duration::from_secs(sensor_info.interval_in_seconds).into());
+		rtc.sleep_light(&[&wake_source]);
+		//delay.delay_millis((sensor_info.interval_in_seconds * 1000) as u32);
 	}
 }
 
 #[embassy_executor::task]
-async fn connection(mut controller: WifiController<'static>) {
+async fn connection(mut wifi_controller: WifiController<'static>) {
 	println!("spawning connection task");
 	loop {
 		match esp_wifi::wifi::wifi_state() {
 			WifiState::StaConnected => {
 				// wait until we're no longer connected
-				controller.wait_for_event(WifiEvent::StaDisconnected).await;
+				wifi_controller.wait_for_event(WifiEvent::StaDisconnected).await;
 				Timer::after(Duration::from_millis(5000)).await
 			}
 			_ => {}
 		}
-		if !matches!(controller.is_started(), Ok(true)) {
+		if !matches!(wifi_controller.is_started(), Ok(true)) {
 			println!("Wifi not started, starting...");
 			let client_config = Configuration::Client(ClientConfiguration {
 				ssid: SSID.try_into().unwrap(),
 				password: PASSWORD.try_into().unwrap(),
 				..Default::default()
 			});
-			controller.set_configuration(&client_config).unwrap();
+			wifi_controller.set_configuration(&client_config).unwrap();
 			println!("Wifi starting...");
-			controller.start_async().await.unwrap();
+			wifi_controller.start_async().await.unwrap();
 			println!("Wifi started!");
 		}
 		println!("Wifi connecting...");
 
-		match controller.connect_async().await {
+		match wifi_controller.connect_async().await {
 			Ok(_) => println!("Wifi connected!"),
 			Err(e) => {
 				println!("Wifi connection failed: {e:?}");
