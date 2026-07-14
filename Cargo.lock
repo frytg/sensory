@@ -1497,7 +1497,7 @@ dependencies = [
 [[package]]
 name = "ws2812-spi"
 version = "0.5.1"
-source = "git+https://github.com/smart-leds-rs/ws2812-spi-rs#f9a8422dac88b7f9a510bf3908b22474e5f9aba9"
+source = "git+https://github.com/smart-leds-rs/ws2812-spi-rs#dcf6b5b61ab3e87c744a4a9b97ef487c36afa604"
 dependencies = [
  "embedded-hal 1.0.0",
  "smart-leds-trait",
