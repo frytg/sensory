@@ -499,21 +499,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f270a29a3c4e492399b13e157b10151a7616cba69c4d554076ea93ed1bd2916"
 dependencies = [
  "cfg-if",
- "esp-config",
+ "esp-config 0.5.0",
  "esp-println",
  "heapless",
 ]
 
 [[package]]
 name = "esp-bootloader-esp-idf"
-version = "0.2.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a093dbdc64b0288baacc214c2e8c2f3f13ecbf979c36ee2f63797ecf22538f1"
+checksum = "35ffc117c3a9859835d89d0e90f5ee9886ce2264a71a849a7a22ab5308f6653c"
 dependencies = [
  "cfg-if",
  "document-features",
  "embedded-storage",
- "esp-config",
+ "esp-config 0.7.0",
+ "esp-hal-procmacros 0.22.0",
+ "esp-metadata-generated 0.4.0",
  "esp-rom-sys",
  "jiff",
  "strum",
@@ -530,6 +532,19 @@ dependencies = [
  "evalexpr",
  "serde",
  "serde_yaml",
+]
+
+[[package]]
+name = "esp-config"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4d9b92fd9cfb0b4f8f1b6219b9763269a335571e307b014903b8201619374b80"
+dependencies = [
+ "document-features",
+ "esp-metadata-generated 0.4.0",
+ "serde",
+ "serde_yaml",
+ "somni-expr",
 ]
 
 [[package]]
@@ -555,15 +570,15 @@ dependencies = [
  "embedded-io",
  "embedded-io-async",
  "enumset",
- "esp-config",
- "esp-hal-procmacros",
+ "esp-config 0.5.0",
+ "esp-hal-procmacros 0.19.0",
  "esp-metadata-generated 0.1.0",
  "esp-riscv-rt",
  "esp-rom-sys",
  "esp32",
  "esp32c2",
  "esp32c3",
- "esp32c6",
+ "esp32c6 0.21.0",
  "esp32h2",
  "esp32s2",
  "esp32s3",
@@ -597,9 +612,9 @@ dependencies = [
  "embassy-time 0.4.0",
  "embassy-time-driver",
  "embassy-time-queue-utils",
- "esp-config",
+ "esp-config 0.5.0",
  "esp-hal",
- "esp-hal-procmacros",
+ "esp-hal-procmacros 0.19.0",
  "esp-metadata-generated 0.1.0",
  "portable-atomic",
  "static_cell",
@@ -614,6 +629,20 @@ dependencies = [
  "document-features",
  "litrs",
  "object",
+ "proc-macro-crate",
+ "proc-macro2",
+ "quote",
+ "syn",
+ "termcolor",
+]
+
+[[package]]
+name = "esp-hal-procmacros"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6aebfabb2c21bec45e575e4f6cb6bb7aa8e1b33e7ac45b5dffa0f9d33ff59105"
+dependencies = [
+ "document-features",
  "proc-macro-crate",
  "proc-macro2",
  "quote",
@@ -647,9 +676,9 @@ dependencies = [
 
 [[package]]
 name = "esp-metadata-generated"
-version = "0.2.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b18b1787dd3adea642fb529dd83fe558a08ace365bbaede4643a8959992900f4"
+checksum = "42c2ee95b945a4780796e4359e72c033aed3b45073880e8029458f538532db8a"
 
 [[package]]
 name = "esp-println"
@@ -677,13 +706,14 @@ dependencies = [
 
 [[package]]
 name = "esp-rom-sys"
-version = "0.1.2"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01bafc39f59d56610b38ed0f63b16abeb8b357b8f546507d0d6c50c1a494f530"
+checksum = "eae852ccb08971155023d1371c96d5490cbc26860f06aee2d629ef73f1a890c3"
 dependencies = [
  "cfg-if",
  "document-features",
- "esp-metadata-generated 0.2.0",
+ "esp-metadata-generated 0.4.0",
+ "esp32c6 0.23.2",
 ]
 
 [[package]]
@@ -701,7 +731,7 @@ dependencies = [
  "embedded-io-async",
  "enumset",
  "esp-alloc",
- "esp-config",
+ "esp-config 0.5.0",
  "esp-hal",
  "esp-metadata-generated 0.1.0",
  "esp-wifi-sys",
@@ -759,6 +789,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2ca8fc81b7164df58b5e04aaac9e987459312e51903cca807317990293973a6e"
 dependencies = [
  "critical-section",
+ "vcell",
+]
+
+[[package]]
+name = "esp32c6"
+version = "0.23.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c58f34ff2633968c12125efc7f4f8f101078d5d34c7cb60eab82268db20986f9"
+dependencies = [
  "vcell",
 ]
 
@@ -1326,6 +1365,21 @@ dependencies = [
  "heapless",
  "managed",
 ]
+
+[[package]]
+name = "somni-expr"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ed9b7648d5e8b2df6c5e49940c54bcdd2b4dd71eafc6e8f1c714eb4581b0f53"
+dependencies = [
+ "somni-parser",
+]
+
+[[package]]
+name = "somni-parser"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a0f368519fc6c85fc1afdb769fb5a51123f6158013e143656e25a3485a0d401c"
 
 [[package]]
 name = "stable_deref_trait"
